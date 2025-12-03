@@ -1,21 +1,33 @@
 
-fH=open("sample1.txt",'r')
+fH=open("puzzle.txt",'r')
 fLines=fH.readlines()
 lines=[]
 for l in fLines:
     lines.append(l.strip())
 
+
+def do_count(count, coeff, init):
+    n_zero=0
+    next=init
+    for _ in range(count):
+        next=init + coeff
+        if next>99:
+            next=0
+        elif next<0:
+            next=99
+        if next == 0:
+            n_zero+=1
+        init=next
+    return next,n_zero
+
+
 def do_move(i_pos, mov):
-    o_pos=i_pos
+    n_zero=0
     # rotations
     n_rot=0
     # given move dir and value
     m_dir=mov[0]
     m_val=int(int(mov[1:]))
-    # extract the val removing roations; store rotations
-    c_mov=m_val%(99+1)
-    n_rot=int(m_val/(99+1))
-    # add or subtract; use a -1
     coeff=0;
     if mov[0]=='R':
         coeff=1
@@ -23,28 +35,16 @@ def do_move(i_pos, mov):
         coeff=-1
     else:
         print("BAD")
-    o_pos=i_pos + coeff*c_mov
-    has_crossed_zero=False
-    if o_pos < 0:
-        o_pos = 100 + o_pos
-    elif o_pos > 99:
-        o_pos = o_pos - 100
-    # has landed at ZERO
-    n_zero = n_rot
-    if o_pos==0:
-        n_zero+=1
-    else: # crossed zero
-        if o_pos < i_pos or has_crossed_zero:
-            n_zero+=1
-    print(i_pos, mov,"->", o_pos)
-    return o_pos, n_zero
+    o_pos, n_zero = do_count(m_val, coeff, i_pos)
+    print(i_pos, mov,"->", o_pos,"zeros:",n_zero)
+    return o_pos, n_zero, 0
 
 inp_pos=50
 out_pos=inp_pos
 tot_zero=0
 for mov_l in lines:
-    out_pos, num_0 = do_move(inp_pos, mov_l)
-    tot_zero += num_0
+    out_pos, num_0, num_r = do_move(inp_pos, mov_l)
+    tot_zero += num_0 + num_r
     inp_pos = out_pos
 
 print("Zeros:", tot_zero)
