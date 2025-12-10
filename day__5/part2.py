@@ -1,8 +1,6 @@
 
-#319434630622799
-#361615643045068<--too high.
 fH=open("puzzle.txt")
-#fH=open("sample1.txt")
+#fH=open("sample2.txt")
 lines=fH.readlines()
 fH.close()
 
@@ -28,55 +26,34 @@ for line in lines:
 
 f_sorted_set=sorted(ufresh_ranges)
 
+
 fresh_ranges={}
-
-for v1,v2 in f_sorted_set:
-    fresh_ranges[v1]=v2
-
-#print("POST SORT:")
-#for k,v in fresh_ranges.items():
-#    print("check range:",k,"-",v)
-
-final_pairs=[]
-#o_beg=0
-#o_end=0
-#for beg,end in fresh_ranges.items():
-#    skip_beg=0
-#    skip_end=0
-#    if o_beg>0 and o_end>0:
-#        if o_beg<beg and beg<o_end:
-#            skip_beg=1
-#        if o_end<beg:
-#            skip_end=1
-#    o_beg=beg
-#    o_end=end
-
 o_beg=0
 o_end=0
-del_k=[]
-mod_k={}
-for beg,end in fresh_ranges.items():
-    if o_beg>0 and o_end>0 and o_beg<beg:
-        str_R=""
-        if beg<o_end:
-            if end<=o_end:
-                #print("del",beg)
-                end=o_end
-                pass
-            else:
-                str_R = "mod:" + str(o_beg)
-                mod_k[o_beg]=end
-            #print(str_R + " del:"+str(beg))
-            del_k.append(beg)
-            beg=o_beg
+idx=0
+for beg,end in f_sorted_set:
+    if idx>0:
+        if beg<=o_end and end<=o_end:
+            idx+=1
+            print("Skipping addition of", beg,"-",end,"because of o_beg:",o_beg,"o_end:",o_end)
+            continue
+        elif beg<=o_end and end>o_end:
+            idx+=1
+            print("Merging", beg,"-",end,"and", o_beg,"-",o_end,"to form",o_beg,"-",end)
+            fresh_ranges[o_beg]=end
+            o_end=end
+            continue
+    fresh_ranges[beg]=end
+    print("added", beg,"-",end)
     o_beg=beg
     o_end=end
+    idx+=1
 
-for k in del_k:
-    del fresh_ranges[k]
 
-for k,v in mod_k.items():
-    fresh_ranges[k]=v
+print("POST SORT:")
+for k,v in fresh_ranges.items():
+    print("check range:",k,"-",v)
+
 
 
 count_i=0
