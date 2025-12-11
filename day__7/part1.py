@@ -10,8 +10,8 @@ idxCOL=-1
 
 for line in lines:
     idxROW += 1
-    if line[:-1]=='\n':
-        line=line[-1:]
+    if line[-1:]=='\n':
+        line=line[:-1]
     idxCOL=-1
     for c in line:
         idxCOL += 1
