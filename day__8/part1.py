@@ -1,4 +1,7 @@
-fH=open("sample.txt",'r')
+
+max_circuits=1000
+
+fH=open("puzzle.txt",'r')
 f_lines=fH.readlines()
 fH.close()
 
@@ -39,24 +42,42 @@ def is_pair_not_done(l1,l2):
     res2 = l2+" and " +l1
     return res1 not in m_pair_done and res2 not in m_pair_done
 
-for line1 in n_lines:
-    p1 = get_posList_from_line(line1)
-    for line2 in n_lines:
-        if line1 != line2 and is_pair_not_done(line1,line2):
+
+#for idx1,line in enumerate(n_lines):
+#    p1 = get_posList_from_line(line1)
+#    idx2 = len(n_lines) - 1 - idx1
+#    p2 = get_posList_from_line(line1)
+#    for idx2,line2 in enumerate(n_lines):
+#        if idx1 != idx2:
+#            str_p=add_to_pair_done(line1,line2)
+#            print("processing",line1,"and",line2)
+#            p2 = get_posList_from_line(line2)
+#            d12 = get_dist2_from_pos12(p1,p2)
+#            if d12 not in dict_dist.keys():
+#                dict_dist[d12]=[]
+#            dict_dist[d12].append((p1,p2))
+
+
+for idx1 in range(0, len(n_lines)):
+    for idx2 in range(idx1, len(n_lines)):
+        line1 = n_lines[idx1]
+        line2 = n_lines[idx2]
+        p1 = get_posList_from_line(line1)
+        p2 = get_posList_from_line(line2)
+        if idx1 != idx2:
             str_p=add_to_pair_done(line1,line2)
-            #print("processing",line1,"and",line2)
+            print("processing",line1,"and",line2)
             p2 = get_posList_from_line(line2)
             d12 = get_dist2_from_pos12(p1,p2)
             if d12 not in dict_dist.keys():
                 dict_dist[d12]=[]
             dict_dist[d12].append((p1,p2))
 
+
+print("DONE.. now processing ...!!")
+
+
 dict_dist = dict(sorted(dict_dist.items()))
-
-#for k,v in dict_dist.items():
-#    print(k,":",v)
-#exit()
-
 
 def are_same(prs1,prs2):
     #print("\t\t:comparing",prs1,prs2)
@@ -166,8 +187,6 @@ def check_if_new_circuit(key_p0, key_p1):
         is_add_circuit = 0
     return is_new_circuit, is_add_circuit
 
-cur_circuits=0
-max_circuits=10
 
 def count_circuits_made():
     total_circuits=0
