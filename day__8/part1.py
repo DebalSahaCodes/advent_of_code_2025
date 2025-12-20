@@ -5,11 +5,7 @@ fH=open("puzzle.txt",'r')
 f_lines=fH.readlines()
 fH.close()
 
-n_lines=[]
-for line in f_lines:
-    if line[-1:]=='\n':
-        line=line[:-1]
-    n_lines.append(line)
+n_lines=[lineX[:-1] for lineX in f_lines] # remove '\n'
 
 n_totalPOS = len(n_lines)
 dict_dist={}
@@ -29,33 +25,6 @@ def get_dist2_from_pos12(pos1,pos2):
         dist2+= val*val
     return dist2
 
-m_pair_done=[]
-
-def add_to_pair_done(l1,l2):
-    str_p = l1+" and " +l2
-    m_pair_done.append(str_p)
-    return str_p
-    
-
-def is_pair_not_done(l1,l2):
-    res1 = l1+" and " +l2
-    res2 = l2+" and " +l1
-    return res1 not in m_pair_done and res2 not in m_pair_done
-
-
-#for idx1,line in enumerate(n_lines):
-#    p1 = get_posList_from_line(line1)
-#    idx2 = len(n_lines) - 1 - idx1
-#    p2 = get_posList_from_line(line1)
-#    for idx2,line2 in enumerate(n_lines):
-#        if idx1 != idx2:
-#            str_p=add_to_pair_done(line1,line2)
-#            print("processing",line1,"and",line2)
-#            p2 = get_posList_from_line(line2)
-#            d12 = get_dist2_from_pos12(p1,p2)
-#            if d12 not in dict_dist.keys():
-#                dict_dist[d12]=[]
-#            dict_dist[d12].append((p1,p2))
 
 
 for idx1 in range(0, len(n_lines)):
@@ -65,7 +34,6 @@ for idx1 in range(0, len(n_lines)):
         p1 = get_posList_from_line(line1)
         p2 = get_posList_from_line(line2)
         if idx1 != idx2:
-            str_p=add_to_pair_done(line1,line2)
             print("processing",line1,"and",line2)
             p2 = get_posList_from_line(line2)
             d12 = get_dist2_from_pos12(p1,p2)
@@ -98,14 +66,6 @@ def get_new_key():
     else:
         return list(final_dict.keys())[-1] + 1
 
-#def is_found_in_v(v,pos):
-#    res=0
-#    for val in v:
-#        if are_same(val,pos):
-#            #print("\t\t:found..breaking")
-#            res=1
-#            break
-#    return res
 
 def find_keys_in_final_dict(val_p):
     #done1or2=0
@@ -203,29 +163,6 @@ def count_circuits_made():
         total_circuits += n_single_c
     return total_circuits, print_str
 
-#def create_circuits():
-#    for _,values in dict_dist.items():
-#        for vals in values:
-#            print("\nProcessing",vals)
-#            kp0,kp1,boxP = find_keys_in_final_dict(vals)
-#            is_new_k, to_add = check_if_new_circuit(kp0, kp1)
-#            # count total circuits being made till now
-#            # before adding the currently connected boxes
-#            # to the tally of total-connected-circuits
-#            p_str=""
-#            if len(final_dict.keys())>0:
-#                cur_circuits, p_str = count_circuits_made()
-#                print("circuits:",p_str,"total:",cur_circuits)
-#                f_cur_circuits = cur_circuits
-#                if is_new_k:
-#                    f_cur_circuits += 1
-#                if f_cur_circuits < max_circuits:
-#                    return
-#            if to_add:
-#                add_in_final_dict(kp0, kp1, boxP)
-#                if p_str=="":
-#                    cur_circuits, p_str = count_circuits_made()
-#                    print("circuits:",p_str,"total:",cur_circuits)
 
 def create_circuits():
     n_shortest = 0
