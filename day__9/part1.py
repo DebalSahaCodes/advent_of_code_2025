@@ -22,7 +22,19 @@ def get_dist_bw_pos1_pos2(pos1,pos2):
 
 dict_dist={}
 
-b_dist=0
+def get_area_from_pair(g_pair):
+    x=g_pair[0][0] - g_pair[1][0]
+    if x<0:
+        x = x*-1
+    x = x+1
+    y=g_pair[0][1] - g_pair[1][1]
+    if y<0:
+        y = y*-1
+    y=y+1
+    return x*y
+
+
+b_area=0
 b_pair=[]
 b_line=[]
 for idx1 in range(0, len(n_lines)):
@@ -33,10 +45,10 @@ for idx1 in range(0, len(n_lines)):
             #print("processing",line1,"and",line2)
             p1 = get_posList_from_line(line1)
             p2 = get_posList_from_line(line2)
-            d12 = get_dist_bw_pos1_pos2(p1,p2)
+            a12 = get_area_from_pair([p1,p2])
             #print("\t:", d12)
-            if d12 > b_dist:
-                b_dist=d12
+            if a12 > b_area:
+                b_area=a12
                 b_pair=[]
                 b_pair.append(p1)
                 b_pair.append(p2)
@@ -44,13 +56,5 @@ for idx1 in range(0, len(n_lines)):
                 b_line.append(line1)
                 b_line.append(line2)
 
-x=b_pair[0][0] - b_pair[1][0]
-if x<0:
-    x = x*-1
-x = x+1
-y=b_pair[0][1] - b_pair[1][1]
-if y<0:
-    y = y*-1
-y=y+1
-print("Biggest Area from ",b_line)
-print('x:',x,' y:',y,' =',x*y)
+
+print("Biggest Area from ",b_line,':',get_area_from_pair(b_pair))
