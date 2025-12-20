@@ -1,4 +1,5 @@
-fH=open("sample.txt",'r')
+
+fH=open("puzzle.txt",'r')
 f_lines=fH.readlines()
 fH.close()
 
@@ -39,24 +40,26 @@ def is_pair_not_done(l1,l2):
     res2 = l2+" and " +l1
     return res1 not in m_pair_done and res2 not in m_pair_done
 
-for line1 in n_lines:
-    p1 = get_posList_from_line(line1)
-    for line2 in n_lines:
-        if line1 != line2 and is_pair_not_done(line1,line2):
+for idx1 in range(0, len(n_lines)):
+    for idx2 in range(idx1, len(n_lines)):
+        line1 = n_lines[idx1]
+        line2 = n_lines[idx2]
+        p1 = get_posList_from_line(line1)
+        p2 = get_posList_from_line(line2)
+        if idx1 != idx2:
             str_p=add_to_pair_done(line1,line2)
-            #print("processing",line1,"and",line2)
+            print("processing",line1,"and",line2)
             p2 = get_posList_from_line(line2)
             d12 = get_dist2_from_pos12(p1,p2)
             if d12 not in dict_dist.keys():
                 dict_dist[d12]=[]
             dict_dist[d12].append((p1,p2))
 
+
+print("DONE.. now processing ...!!")
+
+
 dict_dist = dict(sorted(dict_dist.items()))
-
-#for k,v in dict_dist.items():
-#    print(k,":",v)
-#exit()
-
 
 def are_same(prs1,prs2):
     #print("\t\t:comparing",prs1,prs2)
@@ -76,15 +79,6 @@ def get_new_key():
         return 1
     else:
         return list(final_dict.keys())[-1] + 1
-
-#def is_found_in_v(v,pos):
-#    res=0
-#    for val in v:
-#        if are_same(val,pos):
-#            #print("\t\t:found..breaking")
-#            res=1
-#            break
-#    return res
 
 def find_keys_in_final_dict(val_p):
     #done1or2=0
@@ -166,8 +160,6 @@ def check_if_new_circuit(key_p0, key_p1):
         is_add_circuit = 0
     return is_new_circuit, is_add_circuit
 
-cur_circuits=0
-max_circuits=10
 
 def count_circuits_made():
     total_circuits=0
@@ -184,29 +176,7 @@ def count_circuits_made():
         total_circuits += n_single_c
     return total_circuits, print_str
 
-#def create_circuits():
-#    for _,values in dict_dist.items():
-#        for vals in values:
-#            print("\nProcessing",vals)
-#            kp0,kp1,boxP = find_keys_in_final_dict(vals)
-#            is_new_k, to_add = check_if_new_circuit(kp0, kp1)
-#            # count total circuits being made till now
-#            # before adding the currently connected boxes
-#            # to the tally of total-connected-circuits
-#            p_str=""
-#            if len(final_dict.keys())>0:
-#                cur_circuits, p_str = count_circuits_made()
-#                print("circuits:",p_str,"total:",cur_circuits)
-#                f_cur_circuits = cur_circuits
-#                if is_new_k:
-#                    f_cur_circuits += 1
-#                if f_cur_circuits < max_circuits:
-#                    return
-#            if to_add:
-#                add_in_final_dict(kp0, kp1, boxP)
-#                if p_str=="":
-#                    cur_circuits, p_str = count_circuits_made()
-#                    print("circuits:",p_str,"total:",cur_circuits)
+
 
 def create_circuits():
     n_shortest = 0
@@ -224,30 +194,13 @@ def create_circuits():
             cur_circuits, p_str = count_circuits_made()
             print("circuits:",p_str,"total:",cur_circuits)
             # check if MAX shortest Connections Already Made
-            if len(final_dict.keys()) and n_shortest>=max_circuits:
-                print(max_circuits, "circuits done!!")
-                return
+            if cur_circuits == 1:
+                print("ALL circuits done!!")
+                print("LAST PAIR:","\n\t:",vals[0],"\n\t:",vals[1])
+                return vals[0][0],vals[1][0]
 
 
-create_circuits()
+last1x,last2x = create_circuits()
 
-for k,v in final_dict.items():
-    print("\nTotal Values in key:",k,len(v))
-    #print(v)
 
-n_sizes=[]
-
-for k,v in final_dict.items():
-    n_sizes.append(len(v))
-
-n_sizes.sort(reverse=True)
-
-s_sum=1
-n_idx=0
-for n_idx,lenLOC in enumerate(n_sizes):
-    if n_idx>   2:
-        break
-    print("Multiplying",lenLOC)
-    s_sum*=lenLOC
-
-print("RESULT:",s_sum)
+print("RESULT:",last1x * last2x)
