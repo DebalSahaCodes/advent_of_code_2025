@@ -1,128 +1,144 @@
+f=open("../puzzle.txt")
+fLines=f.readlines()
+f.close()
 
-#fH=open("puzzle.txt",'r')
-fH=open("sample.txt",'r')
-f_lines=fH.readlines()
-fH.close()
+n_pos=[(int(c[0]),int(c[1])) for c in [line.split('\n')[0].split(',') for line in fLines]]
 
-n_lines=[]# remove '\n'
-for line in f_lines:
-    if line[-1:]=='\n':
-        line=line[:-1]
-    n_lines.append(line)
+x_coord=[p[0] for p in n_pos]
+x_coord.sort()
+x_makeUnq={v:-1 for v in x_coord}
+x_compress={v:idx for idx,v in enumerate(x_makeUnq)}
+rev_X={idx:v for v,idx in x_compress.items()}
+x_MAX=[mIdx for idx,mIdx in enumerate(rev_X.keys()) if idx==len(rev_X.keys())-1][0]
 
-x_MAX=-1
-y_MAX=-1
-# generate_posList_from_lines(line)
-n_pos=[]
-for idx,line in enumerate(n_lines):
-    n_pos.append([int(c) for c in line.split(',')])
-    if n_pos[idx][0] > x_MAX:
-        x_MAX = n_pos[idx][0]
-    if n_pos[idx][1] > y_MAX:
-        y_MAX = n_pos[idx][1]
-
-print('x_MAX:',x_MAX)
-print('y_MAX:',y_MAX)
-#exit()
-
-def is_present_in_NPOS(pos):
-    is_found=0
-    for p_pos in n_pos:
-        if pos[0]==p_pos[0] and pos[1]==p_pos[1]:
-            is_found=1
-            break
-    return is_found
+y_coord=[p[1] for p in n_pos]
+y_coord.sort()
+y_makeUnq={v:-1 for v in y_coord}
+y_compress={v:idx for idx,v in enumerate(y_makeUnq)}
+rev_Y = {idx:v for v,idx in y_compress.items()}
+y_MAX=[mIdx for idx,mIdx in enumerate(rev_Y.keys()) if idx==len(rev_Y.keys())-1][0]
 
 
-m_maze={}
-is_found=0
-def generate_maze_red_green():
-    for y in range(0, y_MAX+1):
-        is_on_off=0
-        is_found=0
-        for x in range(0, x_MAX+1):
-            c_pos=(x,y)
-            if is_present_in_NPOS(c_pos):
-                #print("\t:FOUND:",c_pos)
-                #exit()
-                if not is_on_off:
-                    is_on_off=1
-                    #print("\t:setting...")
-                    is_found=1
-                else:
-                    #print("\t:re-setting...")
-                    is_on_off=0
-            if is_on_off or is_found:
-                m_maze[c_pos]='X'
-            else:
-                m_maze[c_pos]='.'
-            #print("\nAdding (",x,',',y,'):',m_maze[c_pos])
-generate_maze_red_green()
+print("x_MAX:",x_MAX)
+print("y_MAX:",y_MAX)
 
-def is_valid_for_area(p1,p2):
-    if p1[0] == p2[0] or p1[1]==p2[1]:
-        #print("\t:Invalid if X same OR Y same")
-        return 0
-    # if P1-P2 is one diagonal then check opposite diagonal
-    # (P1x,P1y) - (P2x,P2y) : main diagonal
-    # (P1x,P2y) - (P2x,P1y) : opposite diagonal
-    p_opp1=[p1[0],p2[1]]
-    p_opp2=[p2[0],p1[1]]
-    is_red_green_1=m_maze[(p_opp1[0], p_opp1[1])]=='X'
-    is_red_green_2=m_maze[(p_opp2[0], p_opp2[1])]=='X'
-    #print("\t:is_red_green", p_opp1,":",is_red_green_1)
-    #print("\t:is_red_green", p_opp2,":",is_red_green_2)
-    return is_red_green_1 and is_red_green_2
+m_grid=[]
+for y in range(0,y_MAX+1):
+    m_grid.append([0*x for x in range(0,x_MAX+1)])
 
+def draw_lines(pos1, pos2):
+    begX = min(x_compress[pos1[0]], x_compress[pos2[0]])
+    endX = max(x_compress[pos1[0]], x_compress[pos2[0]])
+    begY = min(y_compress[pos1[1]], y_compress[pos2[1]])
+    endY = max(y_compress[pos1[1]], y_compress[pos2[1]])
+    if begX == endX:
+        for i in range(begY,endY+1):
+            m_grid[i][begX] = 2
+        m_grid[endY][begX]=1
+    elif begY==endY:
+        for i in range(begX,endX+1):
+            if m_grid[begY][i] == 0:
+                m_grid[begY][i] = 1
+    else:
+        print("BAD CASE FOR DRAW LINE in", pos1,pos2)
+        exit()
 
-def get_dist_bw_pos1_pos2(pos1,pos2):
-    dist2=0
-    for i in range(0,2):
-        val = pos2[i] - pos1[i]
-        dist2+= val*val
-    return dist2
+# create a boundary lines
+for pIdx in range(0, len(n_pos)):
+    if pIdx == len(n_pos)-1: #last entry
+        draw_lines(n_pos[pIdx], n_pos[0])
+    else:
+        draw_lines(n_pos[pIdx], n_pos[pIdx+1])
 
-dict_dist={}
+# fill the polygonal interior area
+for r_idx in range(0, y_MAX+1):
+    parity=0
+    for c_idx in range(0, x_MAX+1):
+        if m_grid[r_idx][c_idx] == 2:
+            parity ^= 1
+        elif parity == 1:
+            m_grid[r_idx][c_idx] = 1
 
-def get_area_from_pair(g_pair):
-    x=g_pair[0][0] - g_pair[1][0]
-    if x<0:
-        x = x*-1
-    x = x+1
-    y=g_pair[0][1] - g_pair[1][1]
-    if y<0:
-        y = y*-1
-    y=y+1
-    return x*y
+##==========================================
+## PRINT GRID ##
+##==========================================
+#l_grid='\n PRINT GRID \n'
+#for r_idx in range(0, y_MAX+1):
+#    for c_idx in range(0, x_MAX+1):
+#        l_grid += str(m_grid[r_idx][c_idx])
+#    l_grid += '\n'
+#print(l_grid)
+##==========================================
 
 
+# prefix sum for cols
+m_col_sums=[]
+# fill the list with 2-D zeros
+for y in range(0,y_MAX+1):
+    m_col_sums.append([0 for _ in range(0,x_MAX+1)])
+# iterate over each column-index (for each col, add list of sum for preceeding-ROWs)
+for col_IDX in range(0, x_MAX+1):
+    sqArea_BEG = -1
+    for row_IDX in range(0,y_MAX+1):
+        if m_grid[row_IDX][col_IDX] == 0:
+            sqArea_BEG = -1
+        else:
+            if sqArea_BEG == -1:
+                sqArea_BEG = rev_Y[row_IDX]
+                #print("\t: using row:",row_IDX,"rev_Y[row]:",rev_Y[row_IDX])
+            m_col_sums[row_IDX][col_IDX] = rev_Y[row_IDX] - sqArea_BEG + 1
 
-b_area=0
-b_pair=[]
-b_line=[]
-for idx1 in range(0, len(n_lines)):
-    for idx2 in range(idx1, len(n_lines)):
-        line1 = n_lines[idx1]
-        line2 = n_lines[idx2]
-        if idx1 != idx2:
-            #print("processing",line1,"and",line2)
-            p1=n_pos[idx1]
-            p2=n_pos[idx2]
-            if not is_valid_for_area(p1,p2):
-                #print("\t:Invalid PAIR!")
-                continue
-            a12 = get_area_from_pair([p1,p2])
-            #print("\t:Area:", a12)
-            if a12 > b_area:
-                b_area=a12
-                b_pair=[]
-                b_pair.append(p1)
-                b_pair.append(p2)
-                b_line=[]
-                b_line.append(line1)
-                b_line.append(line2)
+##==========================================
+##  PRINT COL SUM
+##==========================================
+#for col_IDX in range(0, x_MAX+1):
+#    for row_IDX in range(0,y_MAX+1):
+#        print("Sum of row:",row_IDX,"col:",col_IDX,"=",m_col_sums[row_IDX][col_IDX])
+##==========================================
+
+#print("Printing N_POS")
+#for pos in n_pos:
+#    print(pos)
 
 
-if not b_pair:
-    exit()
-print("Biggest Area from ",b_line,':',get_area_from_pair(b_pair))
+m_answer = 1
+# solve for largest area
+for idx1,pos1 in enumerate(n_pos):
+    for idx2 in range(idx1+1, len(n_pos)):
+        pos2 = n_pos[idx2]
+        # flag to check if the point-PAIR can be used
+        is_good = 1
+        # calculare the next post to consider for the point-PAIR
+        if pos1[1] < pos2[1]: # swap if POS1-y-pos is smaller than y-pos of POS2
+            tmp = pos1
+            pos1 = pos2
+            pos2 = tmp
+        # The AREA-rectangle HEIGHT
+        need_height = abs(pos2[1] - pos1[1]) + 1
+        # get the START and END x-pos for rect-area calc
+        xCompBeg = x_compress[pos1[0]]
+        xCompEnd = x_compress[pos2[0]]
+        # Y-axis value for the Rectangle considered
+        y_RECT = y_compress[pos1[1]]
+    
+        #print("For start:",pos1,"and end:", pos2)
+        #print("\t: xCompBeg:", xCompBeg)
+        #print("\t: xCompEnd:", xCompEnd)
+        #print("\t: y_RECT:", y_RECT)
+    
+        if xCompBeg < xCompEnd:
+            for idxC in range(xCompBeg, xCompEnd+1):
+                if m_grid[y_RECT][idxC] == 0 or m_col_sums[y_RECT][idxC] < need_height:
+                    is_good = 0
+                    break
+        else:
+            for cIDX in range(xCompBeg, xCompEnd-1, -1):
+                if m_grid[y_RECT][cIDX] == 0 or m_col_sums[y_RECT][cIDX] < need_height:
+                    is_good = 0
+                    break
+        if is_good:
+            s0 = abs(pos2[0] - pos1[0]) + 1
+            s1 = abs(pos2[1] - pos1[1]) + 1
+            m_answer = max(m_answer, s0*s1)
+
+print("Result:", m_answer)
